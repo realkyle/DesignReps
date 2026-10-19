@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | Draft v1 (Oct 2026). The implementation must follow this document; change the contract first, then the code. |
+| **Status** | v1, approved Oct 18, 2026. The implementation must follow this document; change the contract first, then the code. |
 | **Type** | Supabase Edge Function (TypeScript / Deno) |
 | **Endpoint** | `POST {SUPABASE_URL}/functions/v1/complete-lesson` |
 | **Auth** | Signed-in user (Supabase Auth access token) |
@@ -157,7 +157,7 @@ All values are constants in the function, so changing them is a single code chan
 
 The MVP track has 8 lessons and 1 scenario, so a user can earn at most 8 × 10 + 25 = **105 XP**.
 
-### Levels (proposed thresholds, fitted to the 105-XP MVP track)
+### Levels (fitted to the 105-XP MVP track)
 | Level | Total XP needed |
 |---|---|
 | 1 | 0 |
@@ -223,8 +223,8 @@ The whole request runs as **one database transaction**: either everything below 
 | Error 4 (403) | Submitting lesson 2 before lesson 1 |
 | Atomicity | Simulated failure partway through → no partial writes |
 
-## Open decisions
+## Decisions (confirmed Oct 18, 2026)
 
-- [ ] Confirm the level thresholds above. They're sized for the 105-XP MVP track and will need rescaling when more tracks are added.
-- [ ] Confirm that repeat completions keep a streak alive.
-- [ ] Confirm that the score is informational only, with no minimum score to "pass" a lesson.
+- **Level thresholds** are 0 / 20 / 40 / 70 / 100 XP, sized for the 105-XP MVP track. They will need rescaling when more tracks are added.
+- **Repeat completions keep a streak alive**, but award no XP.
+- **No passing score:** submitting a complete answer set completes the lesson; `score` is informational only.
