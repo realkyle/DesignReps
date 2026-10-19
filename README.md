@@ -1,56 +1,59 @@
-# Welcome to your Expo app 👋
+# DesignReps
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+**Show up daily. Design better.**
 
-## Get started
+A Duolingo-style mobile app for practicing **system design** for software-engineering interviews. Short, daily, gamified lessons cover the core concepts (scaling, caching, load balancing, databases), plus guided exercises on classic prompts like *design a URL shortener*. Streaks, XP and levels turn system design into a habit instead of a last-minute cram.
 
-1. Install dependencies
+> 🚧 In active development. MVP targeting the iOS App Store, with Android as a secondary target.
 
-   ```bash
-   npm install
-   ```
+## Why I'm building it
 
-2. Start the app
+Coding interviews have LeetCode for daily practice. System design has scattered videos and long-form reading. DesignReps aims to be the daily practice tool for system design, built for students and early-career engineers who are preparing for their first system design round.
 
-   ```bash
-   npx expo start
-   ```
+## Engineering highlights
 
-In the output, you'll find options to open the app in a
+The backend is the main technical focus. The mobile app is intentionally a thin client. *(Already built: the app ↔ Supabase foundation, the key-safety check and the unit-tested domain layer. The rest is being built now.)*
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+- **Server-authoritative game logic.** XP, streaks, levels and lesson unlocks are computed in a Supabase Edge Function, never on the device, so a modified client can't award itself points. Submissions are validated, and duplicate or replayed submissions earn nothing.
+- **Security by design.**
+  - PostgreSQL Row Level Security on every table: users can read and write only their own rows, and no client can write XP or streak values directly.
+  - The app ships only a public, RLS-restricted key. It **refuses to start** if a privileged (`secret` / `service_role`) key is ever configured, which catches that mistake before it can reach a release build.
+- **Data-driven lesson engine.** Lessons are structured JSON rendered by shared components, so a new topic or a whole new track is a content change rather than new screens or schema changes.
+- **Reproducible backend.**
+  - A normalized 5-table schema (`users`, `tracks`, `lessons`, `progress`, `events`) built only through version-controlled SQL migrations.
+  - Lessons are loaded by a seed script.
+  - The full backend can be rebuilt from the repo on a fresh project.
+- **Tested and measured.**
+  - Unit tests for app logic.
+  - An automated suite of 20+ Edge Function tests and 10+ Row Level Security tests.
+  - Performance target: 95% of `complete-lesson` calls finish in under 1 s, with load testing at 50 concurrent users.
+- **Clean architecture.** Screens stay thin; domain logic lives in small, dependency-injected TypeScript classes that are unit tested without a network or device.
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+## Tech stack
 
-## Get a fresh project
+| Layer | Technology |
+|---|---|
+| Mobile | React Native, Expo (SDK 57), TypeScript, Expo Router |
+| Backend | Supabase: PostgreSQL, Auth, Row Level Security, Edge Functions (TypeScript/Deno) |
+| Testing | Jest (app), Deno test runner and SQL tests (backend) |
+| Delivery | Expo EAS Build/Submit, TestFlight, App Store |
 
-When you're ready, run:
+## Architecture
 
-```bash
-npm run reset-project
+```
+┌───────────────────────────────┐  HTTPS   ┌──────────────────────────────────┐
+│ DesignReps app (iOS/Android)  │ ───────▶ │ Supabase                         │
+│  screens → hooks → domain lib │          │  Auth (sessions)                 │
+│  JSON lesson engine           │ ◀─────── │  Edge Function: complete-lesson  │
+└───────────────────────────────┘          │   (XP · streak · unlock rules)   │
+                                           │  PostgreSQL + Row Level Security │
+                                           └──────────────────────────────────┘
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+When a user finishes a lesson, the app sends the result with its session token to `complete-lesson`. The function validates it, updates XP and the streak, unlocks the next lesson, and logs an anonymous usage event. Row Level Security enforces data isolation at the database layer, independent of any client code.
 
-### Other setup steps
+## Engineering practices
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+- Every feature and fix ships on its own branch through a pull request; releases are tagged.
+- Type-check, lint and tests run before every merge.
+- No secrets in the repository. Build-time and server secrets live in EAS and Supabase secret stores.
