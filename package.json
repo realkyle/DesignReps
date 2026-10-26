@@ -46,7 +46,9 @@
     "web": "expo start --web",
     "lint": "expo lint",
     "typecheck": "tsc --noEmit",
-    "test": "jest"
+    "test": "jest",
+    "db:push": "supabase db push --linked",
+    "db:types": "supabase gen types typescript --linked --schema public > src/lib/supabase/database.types.ts"
   },
   "private": true,
   "jest": {
