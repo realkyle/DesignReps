@@ -2,6 +2,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createClient } from "@supabase/supabase-js";
 import { AppState, Platform } from "react-native";
 
+import type { Database } from "./database.types";
 import { SupabaseConfig } from "./SupabaseConfig";
 
 /**
@@ -15,9 +16,10 @@ export const supabaseConfig = SupabaseConfig.fromEnv({
 
 /**
  * The single shared Supabase client. One instance keeps one auth session and
- * one token-refresh timer for the whole app.
+ * one token-refresh timer for the whole app. Typed with the generated
+ * `Database` schema (`npm run db:types`), so table and column names are checked.
  */
-export const supabase = createClient(supabaseConfig.url, supabaseConfig.publishableKey, {
+export const supabase = createClient<Database>(supabaseConfig.url, supabaseConfig.publishableKey, {
   auth: {
     // Persist the session on-device so users stay signed in across launches.
     storage: AsyncStorage,
