@@ -48,3 +48,6 @@ example
 # generated native folders
 /ios
 /android
+
+# Claude Code project rules (kept local; not published)
+CLAUDE.md
