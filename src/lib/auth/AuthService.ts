@@ -30,7 +30,7 @@ export class AuthService {
   constructor(private readonly client: AuthClient) {}
 
   async signIn(email: string, password: string): Promise<SignInResult> {
-    const parsed = Credentials.parse(email, password);
+    const parsed = Credentials.forSignIn(email, password);
     if (!parsed.ok) return { ok: false, fieldErrors: parsed.errors };
     try {
       const { error } = await this.client.signInWithPassword({
@@ -50,7 +50,7 @@ export class AuthService {
    * email that already exists, so we never reveal which emails have accounts.)
    */
   async signUp(email: string, password: string): Promise<SignUpResult> {
-    const parsed = Credentials.parse(email, password);
+    const parsed = Credentials.forSignUp(email, password);
     if (!parsed.ok) return { ok: false, fieldErrors: parsed.errors };
     try {
       const { data, error } = await this.client.signUp({

@@ -2,14 +2,63 @@ import { AuthFailure } from "../AuthFailure";
 import { type AuthClient, AuthService } from "../AuthService";
 import { Credentials } from "../Credentials";
 
-describe("Credentials.parse", () => {
-  it("normalizes the email and keeps the password as typed", () => {
-    const result = Credentials.parse("  Kyle@Example.COM ", "Secret123 ");
+const STRONG = "Design_Reps1";
+
+describe("Credentials.forSignUp", () => {
+  it("accepts a strong password and normalizes the email", () => {
+    const result = Credentials.forSignUp("  Kyle@Example.COM ", STRONG);
     expect(result.ok).toBe(true);
     if (result.ok) {
       expect(result.credentials.email).toBe("kyle@example.com");
-      expect(result.credentials.password).toBe("Secret123 ");
+      expect(result.credentials.password).toBe(STRONG);
     }
+  });
+
+  it.each([
+    ["_", "Design_Reps1"],
+    ["!", "Design!Reps1"],
+    ["space", "Design Reps1"],
+  ])("counts %s as a special character", (_label, password) => {
+    expect(Credentials.forSignUp("a@b.co", password).ok).toBe(true);
+  });
+
+  it.each([
+    ["too short", "De_sig1", "at least 8 characters"],
+    ["no uppercase", "design_reps1", "an uppercase letter"],
+    ["no lowercase", "DESIGN_REPS1", "a lowercase letter"],
+    ["no number", "Design_Reps", "a number"],
+    ["no special character", "DesignReps1", "a special character"],
+  ])("rejects a password with %s", (_label, password, rule) => {
+    const result = Credentials.forSignUp("a@b.co", password);
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.errors.password).toContain(rule);
+  });
+
+  it("lists every missing rule at once", () => {
+    const result = Credentials.forSignUp("a@b.co", "abc");
+    expect(result).toEqual({
+      ok: false,
+      errors: {
+        password:
+          "Password needs at least 8 characters, an uppercase letter, a number, a special character (e.g. _ ! @ #).",
+      },
+    });
+  });
+
+  it("asks for a password when it's empty", () => {
+    expect(Credentials.forSignUp("a@b.co", "")).toEqual({ ok: false, errors: { password: "Enter a password." } });
+  });
+
+  it("describes all 5 rules for the help text", () => {
+    expect(Credentials.describePasswordRules()).toBe(
+      "Use at least 8 characters, an uppercase letter, a lowercase letter, a number, a special character (e.g. _ ! @ #).",
+    );
+  });
+});
+
+describe("Credentials.forSignIn", () => {
+  it("does not apply strength rules, so older accounts can still sign in", () => {
+    expect(Credentials.forSignIn("a@b.co", "simple").ok).toBe(true);
   });
 
   it.each([
@@ -17,20 +66,12 @@ describe("Credentials.parse", () => {
     ["not-an-email", "Enter a valid email address."],
     ["a@b", "Enter a valid email address."],
   ])("rejects email %j", (email, message) => {
-    expect(Credentials.parse(email, "longenough")).toEqual({ ok: false, errors: { email: message } });
-  });
-
-  it.each([
-    ["", "Enter your password."],
-    ["short", "Use at least 8 characters."],
-  ])("rejects password %j", (password, message) => {
-    expect(Credentials.parse("a@b.co", password)).toEqual({ ok: false, errors: { password: message } });
+    expect(Credentials.forSignIn(email, "anything")).toEqual({ ok: false, errors: { email: message } });
   });
 
   it("reports both fields at once", () => {
-    const result = Credentials.parse("", "");
-    expect(result.ok).toBe(false);
-    if (!result.ok) expect(Object.keys(result.errors)).toEqual(["email", "password"]);
+    const result = Credentials.forSignIn("", "");
+    expect(result).toEqual({ ok: false, errors: { email: "Enter your email.", password: "Enter your password." } });
   });
 });
 
@@ -83,6 +124,13 @@ describe("AuthService", () => {
     expect(client.signInWithPassword).not.toHaveBeenCalled();
   });
 
+  it("rejects a weak password on sign-up without calling Supabase", async () => {
+    const { client, service } = fakeClient();
+    const result = await service.signUp("a@b.co", "password1");
+    expect(result).toEqual({ ok: false, fieldErrors: { password: expect.stringContaining("an uppercase letter") } });
+    expect(client.signUp).not.toHaveBeenCalled();
+  });
+
   it("turns a rejected sign-in into a friendly failure", async () => {
     const { service } = fakeClient({
       signInWithPassword: jest.fn().mockResolvedValue({ data: {}, error: { code: "invalid_credentials", status: 400 } }),
@@ -102,14 +150,14 @@ describe("AuthService", () => {
 
   it("signs up and reports signed_in when Supabase returns a session", async () => {
     const { service } = fakeClient();
-    await expect(service.signUp("a@b.co", "password1")).resolves.toEqual({ ok: true, status: "signed_in" });
+    await expect(service.signUp("a@b.co", STRONG)).resolves.toEqual({ ok: true, status: "signed_in" });
   });
 
   it("reports confirmation_required when email confirmation is on (no session yet)", async () => {
     const { service } = fakeClient({
       signUp: jest.fn().mockResolvedValue({ data: { session: null, user: { id: "u1" } }, error: null }),
     });
-    await expect(service.signUp("a@b.co", "password1")).resolves.toEqual({
+    await expect(service.signUp("a@b.co", STRONG)).resolves.toEqual({
       ok: true,
       status: "confirmation_required",
     });
@@ -119,7 +167,7 @@ describe("AuthService", () => {
     const { service } = fakeClient({
       signUp: jest.fn().mockResolvedValue({ data: {}, error: { code: "user_already_exists", status: 422 } }),
     });
-    const result = await service.signUp("a@b.co", "password1");
+    const result = await service.signUp("a@b.co", STRONG);
     expect(!result.ok && "failure" in result && result.failure.kind).toBe("email_taken");
   });
 

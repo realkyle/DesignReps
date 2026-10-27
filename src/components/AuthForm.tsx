@@ -22,13 +22,15 @@ interface AuthFormProps {
   title: string;
   submitLabel: string;
   passwordHint?: string;
+  /** Requirements shown under the password field (sign-up only). */
+  passwordHelp?: string;
   onSubmit: (email: string, password: string) => Promise<AuthFormOutcome>;
   /** Secondary action below the form, e.g. "Create account". */
   footer?: React.ReactNode;
 }
 
 /** Shared email/password form for the sign-in and sign-up screens. */
-export function AuthForm({ title, submitLabel, passwordHint, onSubmit, footer }: AuthFormProps) {
+export function AuthForm({ title, submitLabel, passwordHint, passwordHelp, onSubmit, footer }: AuthFormProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fieldErrors, setFieldErrors] = useState<CredentialErrors>({});
@@ -97,7 +99,11 @@ export function AuthForm({ title, submitLabel, passwordHint, onSubmit, footer }:
           editable={!submitting}
           onSubmitEditing={handleSubmit}
         />
-        {fieldErrors.password && <Text style={styles.errorText}>{fieldErrors.password}</Text>}
+        {fieldErrors.password ? (
+          <Text style={styles.errorText}>{fieldErrors.password}</Text>
+        ) : (
+          passwordHelp && <Text style={styles.helpText}>{passwordHelp}</Text>
+        )}
       </View>
 
       <Pressable
@@ -136,6 +142,7 @@ const styles = StyleSheet.create({
   },
   inputError: { borderColor: "#B91C1C" },
   errorText: { fontSize: 13, color: "#B91C1C" },
+  helpText: { fontSize: 13, color: "#4B5563" },
   primary: {
     height: 52,
     borderRadius: 14,

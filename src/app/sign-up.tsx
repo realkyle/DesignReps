@@ -23,7 +23,8 @@ export default function SignUpScreen() {
     <AuthForm
       title="Create account"
       submitLabel="Create account"
-      passwordHint={`At least ${Credentials.MIN_PASSWORD_LENGTH} characters`}
+      passwordHint="Create a strong password"
+      passwordHelp={Credentials.describePasswordRules()}
       onSubmit={signUp}
       footer={
         <Link href="/sign-in" replace style={styles.link}>
