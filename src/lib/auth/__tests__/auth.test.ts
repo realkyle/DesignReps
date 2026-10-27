@@ -81,6 +81,9 @@ describe("AuthFailure.from", () => {
     [{ code: "email_not_confirmed", status: 400 }, "email_not_confirmed"],
     [{ code: "user_already_exists", status: 422 }, "email_taken"],
     [{ code: "weak_password", status: 422 }, "weak_password"],
+    [{ code: "email_address_invalid", status: 400 }, "email_rejected"],
+    [{ code: "email_address_not_authorized", status: 400 }, "email_rejected"],
+    [{ code: "signup_disabled", status: 422 }, "signup_disabled"],
     [{ code: "over_request_rate_limit", status: 429 }, "rate_limited"],
     [{ status: 429 }, "rate_limited"],
     [{ name: "AuthRetryableFetchError", status: 0 }, "network"],
@@ -89,6 +92,12 @@ describe("AuthFailure.from", () => {
     [undefined, "unknown"],
   ])("maps %j to %s", (error, kind) => {
     expect(AuthFailure.from(error).kind).toBe(kind);
+  });
+
+  it("keeps the raw code for developer logs", () => {
+    expect(AuthFailure.from({ code: "email_address_not_authorized", status: 400 }).code).toBe(
+      "email_address_not_authorized",
+    );
   });
 
   it("never exposes the raw server message", () => {
@@ -107,7 +116,8 @@ function fakeClient(overrides: Partial<Record<keyof AuthClient, jest.Mock>> = {}
     onAuthStateChange: jest.fn(),
     ...overrides,
   };
-  return { client, service: new AuthService(client as unknown as AuthClient) };
+  const logFailure = jest.fn();
+  return { client, logFailure, service: new AuthService(client as unknown as AuthClient, logFailure) };
 }
 
 describe("AuthService", () => {
@@ -138,6 +148,14 @@ describe("AuthService", () => {
     const result = await service.signIn("a@b.co", "password1");
     expect(result.ok).toBe(false);
     if (!result.ok && "failure" in result) expect(result.failure.message).toBe("Incorrect email or password.");
+  });
+
+  it("logs failures by code only, for debugging", async () => {
+    const { service, logFailure } = fakeClient({
+      signUp: jest.fn().mockResolvedValue({ data: {}, error: { code: "email_address_not_authorized", status: 400 } }),
+    });
+    await service.signUp("a@b.co", STRONG);
+    expect(logFailure).toHaveBeenCalledWith(expect.objectContaining({ kind: "email_rejected", code: "email_address_not_authorized" }));
   });
 
   it("reports a network error instead of throwing", async () => {

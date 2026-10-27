@@ -27,7 +27,16 @@ export type SignUpResult =
  * Methods never throw: every outcome is a typed result the UI can render.
  */
 export class AuthService {
-  constructor(private readonly client: AuthClient) {}
+  /**
+   * @param client - Supabase auth (or a fake in tests).
+   * @param logFailure - Where failures are reported for debugging. Defaults to
+   *   a console warning in development builds only. It logs the error code and
+   *   status, never the email, password or tokens.
+   */
+  constructor(
+    private readonly client: AuthClient,
+    private readonly logFailure: (failure: AuthFailure) => void = defaultFailureLogger,
+  ) {}
 
   async signIn(email: string, password: string): Promise<SignInResult> {
     const parsed = Credentials.forSignIn(email, password);
@@ -37,9 +46,9 @@ export class AuthService {
         email: parsed.credentials.email,
         password: parsed.credentials.password,
       });
-      return error ? { ok: false, failure: AuthFailure.from(error) } : { ok: true };
+      return error ? { ok: false, failure: this.fail(error) } : { ok: true };
     } catch (error) {
-      return { ok: false, failure: AuthFailure.from(error) };
+      return { ok: false, failure: this.fail(error) };
     }
   }
 
@@ -57,10 +66,10 @@ export class AuthService {
         email: parsed.credentials.email,
         password: parsed.credentials.password,
       });
-      if (error) return { ok: false, failure: AuthFailure.from(error) };
+      if (error) return { ok: false, failure: this.fail(error) };
       return { ok: true, status: data.session ? "signed_in" : "confirmation_required" };
     } catch (error) {
-      return { ok: false, failure: AuthFailure.from(error) };
+      return { ok: false, failure: this.fail(error) };
     }
   }
 
@@ -89,4 +98,14 @@ export class AuthService {
     const { data } = this.client.onAuthStateChange((_event, session) => listener(session));
     return () => data.subscription.unsubscribe();
   }
+
+  private fail(error: unknown): AuthFailure {
+    const failure = AuthFailure.from(error);
+    this.logFailure(failure);
+    return failure;
+  }
+}
+
+function defaultFailureLogger(failure: AuthFailure): void {
+  if (__DEV__) console.warn(`[auth] ${failure.kind} (code: ${failure.code ?? "none"})`);
 }

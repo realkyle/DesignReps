@@ -3,6 +3,8 @@ export type AuthFailureKind =
   | "email_not_confirmed"
   | "email_taken"
   | "weak_password"
+  | "email_rejected"
+  | "signup_disabled"
   | "rate_limited"
   | "network"
   | "unknown";
@@ -12,6 +14,8 @@ const MESSAGES: Record<AuthFailureKind, string> = {
   email_not_confirmed: "Confirm your email first. Check your inbox for the link.",
   email_taken: "An account with this email already exists. Try signing in.",
   weak_password: "That password is too weak. Try a longer one.",
+  email_rejected: "That email address can't be used. Please use a real email you can access.",
+  signup_disabled: "New sign-ups are turned off right now.",
   rate_limited: "Too many attempts. Please wait a minute and try again.",
   network: "Can't reach the server. Check your connection and try again.",
   unknown: "Something went wrong. Please try again.",
@@ -31,29 +35,48 @@ interface SupabaseAuthErrorLike {
  * wording changes upstream can't leak internals or break the UI.
  */
 export class AuthFailure {
-  private constructor(readonly kind: AuthFailureKind) {}
+  /**
+   * @param kind - Stable category used by the UI.
+   * @param code - Supabase's raw error code, kept for developer logs only (never shown to users).
+   */
+  private constructor(
+    readonly kind: AuthFailureKind,
+    readonly code?: string,
+  ) {}
 
   /** Maps a Supabase auth error (or any thrown value) to a known failure kind. */
   static from(error: unknown): AuthFailure {
     const e = (error ?? {}) as SupabaseAuthErrorLike;
     if (e.name === "AuthRetryableFetchError" || e.status === 0 || error instanceof TypeError) {
-      return new AuthFailure("network");
+      return new AuthFailure("network", e.code);
     }
-    switch (e.code) {
+    return new AuthFailure(AuthFailure.kindForCode(e.code, e.status), e.code);
+  }
+
+  private static kindForCode(code: string | undefined, status: number | undefined): AuthFailureKind {
+    switch (code) {
       case "invalid_credentials":
-        return new AuthFailure("invalid_credentials");
+        return "invalid_credentials";
       case "email_not_confirmed":
-        return new AuthFailure("email_not_confirmed");
+        return "email_not_confirmed";
       case "user_already_exists":
       case "email_exists":
-        return new AuthFailure("email_taken");
+        return "email_taken";
       case "weak_password":
-        return new AuthFailure("weak_password");
+        return "weak_password";
+      // Invalid domain, or Supabase's built-in mailer refusing addresses
+      // outside the project's team while "Confirm email" is on.
+      case "email_address_invalid":
+      case "email_address_not_authorized":
+        return "email_rejected";
+      case "signup_disabled":
+      case "email_provider_disabled":
+        return "signup_disabled";
       case "over_request_rate_limit":
       case "over_email_send_rate_limit":
-        return new AuthFailure("rate_limited");
+        return "rate_limited";
       default:
-        return new AuthFailure(e.status === 429 ? "rate_limited" : "unknown");
+        return status === 429 ? "rate_limited" : "unknown";
     }
   }
 
