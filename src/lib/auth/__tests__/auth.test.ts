@@ -49,10 +49,25 @@ describe("Credentials.forSignUp", () => {
     expect(Credentials.forSignUp("a@b.co", "")).toEqual({ ok: false, errors: { password: "Enter a password." } });
   });
 
-  it("describes all 5 rules for the help text", () => {
-    expect(Credentials.describePasswordRules()).toBe(
-      "Use at least 8 characters, an uppercase letter, a lowercase letter, a number, a special character (e.g. _ ! @ #).",
-    );
+  it("reports each rule's status for the live checklist", () => {
+    expect(Credentials.checkPassword("design1")).toEqual([
+      { description: "at least 8 characters", met: false },
+      { description: "an uppercase letter", met: false },
+      { description: "a lowercase letter", met: true },
+      { description: "a number", met: true },
+      { description: "a special character (e.g. _ ! @ #)", met: false },
+    ]);
+  });
+
+  it("marks every rule met for a strong password", () => {
+    expect(Credentials.checkPassword(STRONG).every((rule) => rule.met)).toBe(true);
+  });
+
+  it("agrees with forSignUp (checklist all green ⇔ password accepted)", () => {
+    for (const password of ["", "abc", "Design_Reps", "design_reps1", STRONG, "Aa1_aaaa"]) {
+      const allMet = Credentials.checkPassword(password).every((rule) => rule.met);
+      expect(Credentials.forSignUp("a@b.co", password).ok).toBe(allMet);
+    }
   });
 });
 

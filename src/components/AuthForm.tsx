@@ -10,6 +10,7 @@ import {
   View,
 } from "react-native";
 
+import { PasswordChecklist } from "@/components/PasswordChecklist";
 import type { CredentialErrors } from "@/lib/auth";
 
 /** What a submit produced, so the form can show field errors or a banner message. */
@@ -22,15 +23,15 @@ interface AuthFormProps {
   title: string;
   submitLabel: string;
   passwordHint?: string;
-  /** Requirements shown under the password field (sign-up only). */
-  passwordHelp?: string;
+  /** Show the live password requirements checklist (sign-up only). */
+  showPasswordChecklist?: boolean;
   onSubmit: (email: string, password: string) => Promise<AuthFormOutcome>;
   /** Secondary action below the form, e.g. "Create account". */
   footer?: React.ReactNode;
 }
 
 /** Shared email/password form for the sign-in and sign-up screens. */
-export function AuthForm({ title, submitLabel, passwordHint, passwordHelp, onSubmit, footer }: AuthFormProps) {
+export function AuthForm({ title, submitLabel, passwordHint, showPasswordChecklist, onSubmit, footer }: AuthFormProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fieldErrors, setFieldErrors] = useState<CredentialErrors>({});
@@ -99,10 +100,10 @@ export function AuthForm({ title, submitLabel, passwordHint, passwordHelp, onSub
           editable={!submitting}
           onSubmitEditing={handleSubmit}
         />
-        {fieldErrors.password ? (
-          <Text style={styles.errorText}>{fieldErrors.password}</Text>
+        {showPasswordChecklist ? (
+          <PasswordChecklist password={password} />
         ) : (
-          passwordHelp && <Text style={styles.helpText}>{passwordHelp}</Text>
+          fieldErrors.password && <Text style={styles.errorText}>{fieldErrors.password}</Text>
         )}
       </View>
 
@@ -142,7 +143,6 @@ const styles = StyleSheet.create({
   },
   inputError: { borderColor: "#B91C1C" },
   errorText: { fontSize: 13, color: "#B91C1C" },
-  helpText: { fontSize: 13, color: "#4B5563" },
   primary: {
     height: 52,
     borderRadius: 14,

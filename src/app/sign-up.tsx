@@ -2,7 +2,7 @@ import { Link } from "expo-router";
 import { StyleSheet, Text } from "react-native";
 
 import { AuthForm, type AuthFormOutcome } from "@/components/AuthForm";
-import { authService, Credentials } from "@/lib/auth";
+import { authService } from "@/lib/auth";
 
 async function signUp(email: string, password: string): Promise<AuthFormOutcome> {
   const result = await authService.signUp(email, password);
@@ -24,7 +24,7 @@ export default function SignUpScreen() {
       title="Create account"
       submitLabel="Create account"
       passwordHint="Create a strong password"
-      passwordHelp={Credentials.describePasswordRules()}
+      showPasswordChecklist
       onSubmit={signUp}
       footer={
         <Link href="/sign-in" replace style={styles.link}>

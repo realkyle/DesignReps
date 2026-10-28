@@ -8,6 +8,12 @@ export type CredentialsResult =
   | { ok: true; credentials: Credentials }
   | { ok: false; errors: CredentialErrors };
 
+/** A password rule and whether a given password satisfies it. */
+export interface PasswordRuleStatus {
+  description: string;
+  met: boolean;
+}
+
 /** One password strength rule, with the phrase used to name it when it's missing. */
 interface PasswordRule {
   description: string;
@@ -61,9 +67,13 @@ export class Credentials {
     return Credentials.build(email, password, password ? undefined : "Enter your password.");
   }
 
-  /** Human-readable list of password requirements, for help text under the field. */
-  static describePasswordRules(): string {
-    return `Use ${Credentials.PASSWORD_RULES.map((rule) => rule.description).join(", ")}.`;
+  /**
+   * Which password rules `password` meets, in display order. Drives the live
+   * checklist on the sign-up screen; uses the same rules as `forSignUp`, so
+   * the checklist and the validation can never disagree.
+   */
+  static checkPassword(password: string): PasswordRuleStatus[] {
+    return Credentials.PASSWORD_RULES.map((rule) => ({ description: rule.description, met: rule.test(password) }));
   }
 
   get email(): string {
