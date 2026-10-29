@@ -50,7 +50,9 @@
     "typecheck": "tsc --noEmit",
     "test": "jest",
     "db:push": "supabase db push --linked",
-    "db:types": "supabase gen types typescript --linked --schema public > src/lib/supabase/database.types.ts"
+    "db:types": "supabase gen types typescript --linked --schema public > src/lib/supabase/database.types.ts",
+    "test:db": "supabase test db",
+    "test:db:concurrency": "bash supabase/tests/concurrency/double-submit.sh"
   },
   "private": true,
   "jest": {

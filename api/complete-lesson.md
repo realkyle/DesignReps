@@ -142,6 +142,8 @@ interface ApiError {
 
 **Check order:** auth → body validation → lesson exists → lesson unlocked. The first failing check decides the error. For example, a malformed request from a signed-out user gets `401`.
 
+Body validation happens in two parts. Shape rules (JSON, UUID, answer objects, duplicates, time zone) are checked first. Rules that need the lesson's content (unknown question or choice, missing answer) can only be checked once the lesson is found, so they run after the `404` check and before the `403` check.
+
 ---
 
 ## Game rules
@@ -175,6 +177,8 @@ Dates are calendar days in the request's `timezone`.
 | Yesterday | +1 |
 | Earlier, or never | Reset to 1 |
 
+If "today" is *earlier* than the last completion day (the user moved west or changed time zone), it counts as **today**: the streak is unchanged and the stored day never moves backwards.
+
 Any valid completion counts toward the streak, **including repeats**. Practicing an old lesson keeps a streak alive, as in Duolingo. `streak.longest` = max(`longest`, `current`).
 
 ### Unlocking
@@ -183,6 +187,15 @@ Any valid completion counts toward the streak, **including repeats**. Practicing
 - `unlockedLessonId` is returned only on the **first** completion, and only if a next lesson exists.
 
 ---
+
+## Implementation
+
+| Part | Where | Does |
+|---|---|---|
+| Edge Function `complete-lesson` | `supabase/functions/complete-lesson/` | Verifies the access token, checks the body's shape, calls the database function with the user ID **from the token**, and maps error codes to HTTP statuses |
+| Postgres function `complete_lesson(user_id, lesson_id, answers, timezone)` | `supabase/migrations/…_complete_lesson_function.sql` | Locks the user row, grades, applies the game rules and writes, all in one transaction. Executable by `service_role` only |
+
+The game rules run inside the database, next to the data, so they share the transaction with the writes. Edge Functions are kept for work that needs outside services. The TypeScript engine in `supabase/functions/_shared/game/` is the reference version of the same rules.
 
 ## Side effects
 
