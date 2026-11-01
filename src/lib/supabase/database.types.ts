@@ -210,7 +210,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      complete_lesson: {
+        Args: {
+          p_answers: Json
+          p_lesson_id: string
+          p_timezone?: string
+          p_user_id: string
+        }
+        Returns: Json
+      }
     }
     Enums: {
       [_ in never]: never
