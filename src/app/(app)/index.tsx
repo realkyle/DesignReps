@@ -1,59 +1,157 @@
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { useRouter } from "expo-router";
+import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { type ConnectionState, useSupabaseConnection } from "@/hooks/useSupabaseConnection";
+import { colors } from "@/components/theme";
+import { useLessonPath } from "@/hooks/useLessonPath";
 import { authService } from "@/lib/auth";
-import { useSession } from "@/providers/SessionProvider";
+import type { PathItem } from "@/lib/learning";
 
-/** Temporary signed-in home; becomes the lesson path once the lesson engine exists. */
+/** Home: the player's stats and the lesson path (completed ✓, open, locked 🔒). */
 export default function HomeScreen() {
-  const { session } = useSession();
-  const connection = useSupabaseConnection();
+  const router = useRouter();
+  const insets = useSafeAreaInsets();
+  const { path, player, error, isLoading, reload } = useLessonPath();
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>DesignReps</Text>
-      <Text style={styles.tagline}>Show up daily. Design better.</Text>
-      <Text style={styles.signedIn}>Signed in as {session?.user.email}</Text>
-      <Text style={styles.status}>{describe(connection)}</Text>
-      <Pressable
-        accessibilityRole="button"
-        style={({ pressed }) => [styles.signOut, pressed && styles.signOutPressed]}
-        onPress={() => authService.signOut()}
-      >
+    <ScrollView
+      style={styles.screen}
+      contentContainerStyle={[styles.content, { paddingTop: insets.top + 16, paddingBottom: insets.bottom + 24 }]}
+      refreshControl={<RefreshControl refreshing={isLoading && path !== null} onRefresh={reload} />}
+    >
+      <View style={styles.header}>
+        <Text style={styles.brand}>DesignReps</Text>
+        <View style={styles.stats}>
+          <Stat label="Streak" value={player ? `🔥 ${player.streak}` : "–"} />
+          <Stat label="XP" value={player ? `${player.xp}` : "–"} />
+          <Stat label="Level" value={player ? `${player.level}` : "–"} />
+        </View>
+      </View>
+
+      {error && <Text style={styles.error}>{error}</Text>}
+      {!path && !error && <Text style={styles.muted}>Loading your lessons…</Text>}
+
+      {path && (
+        <>
+          <Text style={styles.trackTitle}>{path.trackTitle}</Text>
+          <Text style={styles.muted}>
+            {path.completedCount} of {path.items.length} complete
+          </Text>
+          <View style={styles.path}>
+            {path.items.map((item) => (
+              <LessonRow
+                key={item.id}
+                item={item}
+                isNext={item.id === path.nextLesson?.id}
+                onPress={() => router.push({ pathname: "/lesson/[id]", params: { id: item.id } })}
+              />
+            ))}
+          </View>
+        </>
+      )}
+
+      <Pressable accessibilityRole="button" onPress={() => authService.signOut()} style={styles.signOut}>
         <Text style={styles.signOutText}>Sign out</Text>
       </Pressable>
+    </ScrollView>
+  );
+}
+
+function Stat({ label, value }: { label: string; value: string }) {
+  return (
+    <View style={styles.stat} accessible accessibilityLabel={`${label}: ${value}`}>
+      <Text style={styles.statValue}>{value}</Text>
+      <Text style={styles.statLabel}>{label}</Text>
     </View>
   );
 }
 
-function describe(connection: ConnectionState): string {
-  if (!connection) return "Checking Supabase…";
-  if (connection.ok) return `✅ Supabase connected (${connection.latencyMs} ms)`;
-  return `❌ ${connection.reason}`;
+function LessonRow({ item, isNext, onPress }: { item: PathItem; isNext: boolean; onPress: () => void }) {
+  const locked = item.status === "locked";
+  const done = item.status === "completed";
+  const badge = done ? "✓" : locked ? "🔒" : String(item.position);
+  const subtitle = item.kind === "scenario" ? "Scenario · 25 XP" : "Lesson · 10 XP";
+
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityState={{ disabled: locked }}
+      accessibilityLabel={`${item.title}, ${done ? "completed" : locked ? "locked" : "open"}`}
+      disabled={locked}
+      onPress={onPress}
+      style={({ pressed }) => [
+        styles.row,
+        isNext && styles.rowNext,
+        locked && styles.rowLocked,
+        pressed && styles.rowPressed,
+      ]}
+    >
+      <View style={[styles.badge, done && styles.badgeDone, isNext && styles.badgeNext, locked && styles.badgeLocked]}>
+        <Text style={[styles.badgeText, (done || isNext) && styles.badgeTextLight]}>{badge}</Text>
+      </View>
+      <View style={styles.rowText}>
+        <Text style={[styles.rowTitle, locked && styles.lockedText]}>{item.title}</Text>
+        <Text style={[styles.rowSubtitle, locked && styles.lockedText]}>
+          {done ? "Completed · practice again" : locked ? "Finish the previous lesson to unlock" : subtitle}
+        </Text>
+      </View>
+      {isNext && <Text style={styles.start}>Start</Text>}
+    </Pressable>
+  );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  screen: { flex: 1, backgroundColor: colors.background },
+  content: { paddingHorizontal: 20, gap: 8 },
+  header: { gap: 16, marginBottom: 16 },
+  brand: { fontSize: 28, fontWeight: "800", color: colors.text },
+  stats: { flexDirection: "row", gap: 12 },
+  stat: {
     flex: 1,
+    paddingVertical: 12,
+    borderRadius: 14,
+    backgroundColor: colors.surface,
+    alignItems: "center",
+  },
+  statValue: { fontSize: 20, fontWeight: "800", color: colors.text },
+  statLabel: { fontSize: 13, color: colors.textMuted, marginTop: 2 },
+  trackTitle: { fontSize: 20, fontWeight: "700", color: colors.text },
+  muted: { fontSize: 14, color: colors.textMuted },
+  error: { fontSize: 15, color: colors.danger },
+  path: { gap: 12, marginTop: 12 },
+  row: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 14,
+    padding: 14,
+    borderRadius: 16,
+    borderWidth: 1.5,
+    borderColor: colors.border,
+    backgroundColor: colors.background,
+  },
+  rowNext: { borderColor: colors.primary, backgroundColor: colors.primarySoft },
+  rowLocked: { backgroundColor: colors.surface },
+  rowPressed: { opacity: 0.75 },
+  badge: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     alignItems: "center",
     justifyContent: "center",
-    gap: 8,
-    paddingHorizontal: 24,
-    backgroundColor: "#FFFFFF",
-  },
-  title: { fontSize: 32, fontWeight: "700" },
-  tagline: { fontSize: 16, color: "#4B5563" },
-  signedIn: { marginTop: 24, fontSize: 16, fontWeight: "600", color: "#111827" },
-  status: { fontSize: 14, textAlign: "center", color: "#374151" },
-  signOut: {
-    marginTop: 24,
-    height: 48,
-    paddingHorizontal: 28,
-    borderRadius: 14,
+    backgroundColor: colors.surface,
     borderWidth: 1.5,
-    borderColor: "#1D4ED8",
-    justifyContent: "center",
+    borderColor: colors.border,
   },
-  signOutPressed: { opacity: 0.7 },
-  signOutText: { color: "#1D4ED8", fontSize: 16, fontWeight: "700" },
+  badgeDone: { backgroundColor: colors.success, borderColor: colors.success },
+  badgeNext: { backgroundColor: colors.primary, borderColor: colors.primary },
+  badgeLocked: { backgroundColor: colors.background },
+  badgeText: { fontSize: 18, fontWeight: "800", color: colors.text },
+  badgeTextLight: { color: "#FFFFFF" },
+  rowText: { flex: 1, gap: 2 },
+  rowTitle: { fontSize: 17, fontWeight: "700", color: colors.text },
+  rowSubtitle: { fontSize: 13, color: colors.textMuted },
+  lockedText: { color: colors.locked },
+  start: { fontSize: 15, fontWeight: "800", color: colors.primary },
+  signOut: { marginTop: 32, alignSelf: "center", padding: 12 },
+  signOutText: { color: colors.primary, fontSize: 15, fontWeight: "600" },
 });
