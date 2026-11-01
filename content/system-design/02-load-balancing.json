@@ -1,0 +1,99 @@
+{
+  "schemaVersion": 1,
+  "slug": "load-balancing",
+  "title": "Load balancing",
+  "kind": "lesson",
+  "position": 2,
+  "estimatedMinutes": 6,
+  "steps": [
+    {
+      "type": "concept",
+      "id": "c1",
+      "title": "What a load balancer does",
+      "body": "A load balancer spreads incoming client requests across a pool of servers. It stops requests from reaching unhealthy servers, keeps any one server from being overloaded, and helps remove a single point of failure. It can also handle work like SSL termination, so the servers behind it don't have to."
+    },
+    {
+      "type": "question",
+      "id": "q1",
+      "prompt": "One of your three app servers crashes. What should a load balancer with health checks do?",
+      "choices": [
+        { "id": "a", "text": "Keep sending it a third of the traffic" },
+        { "id": "b", "text": "Stop sending requests to it until it's healthy again" },
+        { "id": "c", "text": "Shut down the other two servers" }
+      ],
+      "correctChoiceId": "b",
+      "explanation": "Health checks let the load balancer route around unhealthy servers, so users keep getting answers from the healthy ones."
+    },
+    {
+      "type": "concept",
+      "id": "c2",
+      "title": "Layer 4 vs. layer 7",
+      "body": "A layer 4 load balancer decides using transport-level information such as IP addresses and ports, without reading the request's content. A layer 7 load balancer reads the application-level request (URL, headers, cookies), so it can, for example, send /video traffic to video servers. Layer 7 is more flexible but does more work per request."
+    },
+    {
+      "type": "question",
+      "id": "q2",
+      "prompt": "You want requests for /api/* to go to API servers and /images/* to go to image servers. Which load balancer do you need?",
+      "choices": [
+        { "id": "a", "text": "Layer 4" },
+        { "id": "b", "text": "Layer 7" },
+        { "id": "c", "text": "Either works the same" }
+      ],
+      "correctChoiceId": "b",
+      "explanation": "Routing by URL path requires reading the HTTP request, which is application-level (layer 7). Layer 4 only sees addresses and ports."
+    },
+    {
+      "type": "concept",
+      "id": "c3",
+      "title": "Choosing a server",
+      "body": "Round robin sends each new request to the next server in order. Weighted round robin sends more requests to stronger servers. Least connections sends each request to the server with the fewest active connections, which helps when some requests take much longer than others."
+    },
+    {
+      "type": "question",
+      "id": "q3",
+      "prompt": "Some requests take 50 ms and others take 10 seconds. Which algorithm best avoids piling work onto one busy server?",
+      "choices": [
+        { "id": "a", "text": "Round robin" },
+        { "id": "b", "text": "Least connections" },
+        { "id": "c", "text": "Random" }
+      ],
+      "correctChoiceId": "b",
+      "explanation": "Least connections looks at current load, so a server stuck on long requests gets fewer new ones. Round robin ignores how busy each server is."
+    },
+    {
+      "type": "question",
+      "id": "q4",
+      "prompt": "Your servers have different sizes: one has twice the CPU of the others. Which algorithm accounts for that?",
+      "choices": [
+        { "id": "a", "text": "Weighted round robin" },
+        { "id": "b", "text": "Plain round robin" },
+        { "id": "c", "text": "Layer 4 routing" }
+      ],
+      "correctChoiceId": "a",
+      "explanation": "Weighted round robin gives stronger servers a bigger share of requests. Plain round robin treats every server the same."
+    },
+    {
+      "type": "question",
+      "id": "q5",
+      "prompt": "What is a risk of running a single load balancer?",
+      "choices": [
+        { "id": "a", "text": "It becomes a single point of failure" },
+        { "id": "b", "text": "It makes servers stateful" },
+        { "id": "c", "text": "It increases database size" }
+      ],
+      "correctChoiceId": "a",
+      "explanation": "If the only load balancer fails, nothing reaches the servers. Running more than one (active-passive or active-active) removes that single point of failure, at the cost of extra complexity."
+    }
+  ],
+  "sources": [
+    {
+      "title": "System Design Primer: Load balancer",
+      "url": "https://github.com/donnemartin/system-design-primer#load-balancer",
+      "license": "CC BY 4.0"
+    },
+    {
+      "title": "Cloudflare: What is load balancing?",
+      "url": "https://www.cloudflare.com/learning/performance/what-is-load-balancing/"
+    }
+  ]
+}

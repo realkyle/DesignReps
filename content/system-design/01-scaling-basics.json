@@ -1,0 +1,105 @@
+{
+  "schemaVersion": 1,
+  "slug": "scaling-basics",
+  "title": "Scaling basics",
+  "kind": "lesson",
+  "position": 1,
+  "estimatedMinutes": 6,
+  "steps": [
+    {
+      "type": "concept",
+      "id": "c1",
+      "title": "Performance vs. scalability",
+      "body": "A system has a performance problem when it is slow for a single user. It has a scalability problem when it is fast for one user but slow under heavy load. A service is scalable if adding resources increases its performance in proportion to the resources added."
+    },
+    {
+      "type": "question",
+      "id": "q1",
+      "prompt": "Your app is fast when you test it alone, but slows down badly when 10,000 users arrive. What kind of problem is this?",
+      "choices": [
+        { "id": "a", "text": "A performance problem" },
+        { "id": "b", "text": "A scalability problem" },
+        { "id": "c", "text": "A latency problem only" }
+      ],
+      "correctChoiceId": "b",
+      "explanation": "Fast for one user but slow under load is the definition of a scalability problem. A performance problem would be slow even for a single user."
+    },
+    {
+      "type": "concept",
+      "id": "c2",
+      "title": "Latency vs. throughput",
+      "body": "Latency is the time it takes to perform one action or produce one result. Throughput is how many of those actions are completed per unit of time. A common goal is the highest throughput possible while keeping latency acceptable."
+    },
+    {
+      "type": "question",
+      "id": "q2",
+      "prompt": "An API handles 2,000 requests per second, and each request takes 80 ms. Which number is the throughput?",
+      "choices": [
+        { "id": "a", "text": "80 ms" },
+        { "id": "b", "text": "2,000 requests per second" },
+        { "id": "c", "text": "Both numbers together" }
+      ],
+      "correctChoiceId": "b",
+      "explanation": "Throughput counts completed actions per unit of time (2,000 per second). The 80 ms is latency: how long one request takes."
+    },
+    {
+      "type": "question",
+      "id": "q3",
+      "prompt": "What is the usual goal when tuning latency and throughput?",
+      "choices": [
+        { "id": "a", "text": "Lowest latency, whatever the throughput" },
+        { "id": "b", "text": "Maximum throughput with acceptable latency" },
+        { "id": "c", "text": "Equal latency and throughput" }
+      ],
+      "correctChoiceId": "b",
+      "explanation": "Systems aim to serve as much work as possible (throughput) while each request still finishes fast enough for users (acceptable latency)."
+    },
+    {
+      "type": "concept",
+      "id": "c3",
+      "title": "Vertical vs. horizontal scaling",
+      "body": "Vertical scaling means giving one machine more power (CPU, memory). It is simple but has a hardware ceiling and expensive top-end machines. Horizontal scaling means adding more machines. Using many commodity servers is usually more cost-efficient and more available, but it adds complexity: servers should be stateless, with user sessions kept in a shared store such as a database or a cache like Redis."
+    },
+    {
+      "type": "question",
+      "id": "q4",
+      "prompt": "Which is a real downside of horizontal scaling?",
+      "choices": [
+        { "id": "a", "text": "It has a hard ceiling set by the biggest machine you can buy" },
+        { "id": "b", "text": "It adds complexity, such as keeping servers stateless" },
+        { "id": "c", "text": "It reduces availability" }
+      ],
+      "correctChoiceId": "b",
+      "explanation": "More machines means more moving parts: servers must be stateless and sessions moved to a shared store. The hardware ceiling is the downside of vertical scaling, and more machines usually improve availability."
+    },
+    {
+      "type": "question",
+      "id": "q5",
+      "prompt": "After scaling out to 5 web servers, users get logged out at random. What is the most likely cause?",
+      "choices": [
+        { "id": "a", "text": "Sessions are stored in each server's memory instead of a shared store" },
+        { "id": "b", "text": "The servers have too little CPU" },
+        { "id": "c", "text": "The database is too large" }
+      ],
+      "correctChoiceId": "a",
+      "explanation": "If each server keeps sessions in its own memory, a request that lands on a different server can't find the session. Keeping servers stateless and storing sessions centrally (e.g. Redis) fixes it."
+    }
+  ],
+  "sources": [
+    {
+      "title": "System Design Primer: Performance vs scalability",
+      "url": "https://github.com/donnemartin/system-design-primer#performance-vs-scalability",
+      "license": "CC BY 4.0"
+    },
+    {
+      "title": "System Design Primer: Latency vs throughput",
+      "url": "https://github.com/donnemartin/system-design-primer#latency-vs-throughput",
+      "license": "CC BY 4.0"
+    },
+    {
+      "title": "System Design Primer: Horizontal scaling",
+      "url": "https://github.com/donnemartin/system-design-primer#horizontal-scaling",
+      "license": "CC BY 4.0"
+    }
+  ]
+}

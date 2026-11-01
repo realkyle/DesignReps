@@ -1,4 +1,4 @@
-export { Lesson } from "./Lesson";
+export { Lesson, type LessonDatabaseRow } from "./Lesson";
 export { LessonValidationError, type LessonIssue } from "./LessonValidationError";
 export {
   LESSON_SCHEMA_VERSION,
