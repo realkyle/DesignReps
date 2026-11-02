@@ -8,6 +8,15 @@ import {
 } from "./lessonSchema";
 import { LessonValidationError } from "./LessonValidationError";
 
+/** How a lesson is stored: four columns plus the rest of the file as JSON. */
+export interface LessonDatabaseRow {
+  slug: string;
+  title: string;
+  kind: string;
+  position: number;
+  content: unknown;
+}
+
 /**
  * A validated, read-only lesson or scenario.
  *
@@ -37,6 +46,26 @@ export class Lesson {
       );
     }
     return new Lesson(result.data);
+  }
+
+  /**
+   * Rebuilds a lesson from a `lessons` table row (columns + `content` JSON),
+   * re-validating it. Database content is still treated as untrusted input.
+   *
+   * @throws {LessonValidationError} if the stored lesson is invalid.
+   */
+  static fromDatabaseRow(row: LessonDatabaseRow, source?: string): Lesson {
+    const content = typeof row.content === "object" && row.content !== null && !Array.isArray(row.content) ? row.content : {};
+    return Lesson.parse({ ...content, slug: row.slug, title: row.title, kind: row.kind, position: row.position }, source);
+  }
+
+  /**
+   * Splits the lesson into the `lessons` table's columns and its `content`
+   * JSON (everything else). The inverse of `fromDatabaseRow`.
+   */
+  toDatabaseRow(): LessonDatabaseRow {
+    const { slug, title, kind, position, ...content } = this.document;
+    return { slug, title, kind, position, content };
   }
 
   get slug(): string {

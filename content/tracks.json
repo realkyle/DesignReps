@@ -1,0 +1,8 @@
+[
+  {
+    "slug": "system-design",
+    "title": "System Design Fundamentals",
+    "description": "Core building blocks for system design interviews: scaling, load balancing, caching, databases and more.",
+    "position": 1
+  }
+]

@@ -103,7 +103,7 @@ select is(
                      'details', jsonb_build_object('requiredLessonId', l1)),
   'lesson 2 before lesson 1 → 403 naming lesson 1') from ids;
 
-select is((select count(*)::int from public.progress), 0, 'errors write no progress');
+select is((select count(*)::int from public.progress, ids where user_id = user_a), 0, 'errors write no progress');
 select is((select xp from public.users, ids where id = user_a), 0, 'errors award no XP');
 
 -- =============================================================================

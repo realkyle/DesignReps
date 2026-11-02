@@ -165,3 +165,27 @@ describe("LessonValidationError.formatPath", () => {
     expect(LessonValidationError.formatPath(path)).toBe(expected);
   });
 });
+
+describe("Lesson database rows", () => {
+  it("splits into columns + content and round-trips back to the same lesson", () => {
+    const lesson = Lesson.parse(validLesson());
+    const row = lesson.toDatabaseRow();
+
+    expect(row).toMatchObject({ slug: lesson.slug, title: lesson.title, kind: lesson.kind, position: lesson.position });
+    expect(row.content).not.toHaveProperty("slug");
+    expect(row.content).toHaveProperty("steps");
+
+    const restored = Lesson.fromDatabaseRow(row);
+    expect(restored.toDatabaseRow()).toEqual(row);
+  });
+
+  it("re-validates stored content (database rows are untrusted)", () => {
+    const row = { ...Lesson.parse(validLesson()).toDatabaseRow(), content: { steps: [] } };
+    expect(() => Lesson.fromDatabaseRow(row)).toThrow(LessonValidationError);
+  });
+
+  it("treats non-object content as missing", () => {
+    const row = { ...Lesson.parse(validLesson()).toDatabaseRow(), content: null };
+    expect(() => Lesson.fromDatabaseRow(row)).toThrow(LessonValidationError);
+  });
+});

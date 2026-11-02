@@ -39,6 +39,7 @@
     "jest": "~30.5.2",
     "jest-expo": "~58.0.12",
     "supabase": "^2.122.0",
+    "tsx": "^4.23.15",
     "typescript": "~6.0.3"
   },
   "scripts": {
@@ -52,7 +53,9 @@
     "db:push": "supabase db push --linked",
     "db:types": "supabase gen types typescript --linked --schema public > src/lib/supabase/database.types.ts",
     "test:db": "supabase test db",
-    "test:db:concurrency": "bash supabase/tests/concurrency/double-submit.sh"
+    "test:db:concurrency": "bash supabase/tests/concurrency/double-submit.sh",
+    "seed:build": "tsx scripts/build-seed.ts",
+    "seed:push": "npm run seed:build && supabase db push --linked --include-seed"
   },
   "private": true,
   "jest": {
