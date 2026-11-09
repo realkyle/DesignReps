@@ -219,6 +219,13 @@ export type Database = {
         }
         Returns: Json
       }
+      log_event: {
+        Args: {
+          p_lesson_id?: string
+          p_type: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never
