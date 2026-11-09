@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 
+import { usageEvents } from "@/lib/events";
 import { type CompletionOutcome, learningRepository, lessonCompletion, LessonSession } from "@/lib/learning";
 
 export type PlayerPhase =
@@ -26,6 +27,7 @@ export function useLessonPlayer(lessonId: string) {
       if (!result.ok) return setPhase({ kind: "error", message: result.message });
       setDatabaseId(result.value.id);
       setPhase({ kind: "playing", session: LessonSession.start(result.value.lesson) });
+      void usageEvents.lessonStarted(result.value.id);
     });
     return () => {
       cancelled = true;
