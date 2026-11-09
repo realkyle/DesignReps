@@ -53,6 +53,9 @@ export default function HomeScreen() {
       <Pressable accessibilityRole="button" onPress={() => authService.signOut()} style={styles.signOut}>
         <Text style={styles.signOutText}>Sign out</Text>
       </Pressable>
+      <Pressable accessibilityRole="button" onPress={() => router.push("/delete-account")} style={styles.deleteAccount}>
+        <Text style={styles.deleteAccountText}>Delete account</Text>
+      </Pressable>
     </ScrollView>
   );
 }
@@ -154,4 +157,6 @@ const styles = StyleSheet.create({
   start: { fontSize: 15, fontWeight: "800", color: colors.primary },
   signOut: { marginTop: 32, alignSelf: "center", padding: 12 },
   signOutText: { color: colors.primary, fontSize: 15, fontWeight: "600" },
+  deleteAccount: { alignSelf: "center", padding: 12 },
+  deleteAccountText: { color: colors.textMuted, fontSize: 14 },
 });
