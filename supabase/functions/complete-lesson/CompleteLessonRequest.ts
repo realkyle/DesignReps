@@ -1,4 +1,4 @@
-import { ApiError } from "./ApiError.ts";
+import { ApiError } from "../_shared/http/ApiError.ts";
 
 export interface Answer {
   questionId: string;

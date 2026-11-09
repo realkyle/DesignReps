@@ -419,3 +419,6 @@ enabled = true
 # auth.getClaims), so the gateway check is off to avoid doing it twice.
 [functions.complete-lesson]
 verify_jwt = false
+
+[functions.delete-account]
+verify_jwt = false

@@ -8,6 +8,7 @@
  */
 import { createClient } from "npm:@supabase/supabase-js@2.118.0";
 
+import { RESPONSE_HEADERS } from "../_shared/http/Http.ts";
 import { CompleteLessonHandler } from "./CompleteLessonHandler.ts";
 
 const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, {
@@ -39,13 +40,6 @@ const handler = new CompleteLessonHandler({
   },
 });
 
-const HEADERS = {
-  "Content-Type": "application/json",
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-};
-
 Deno.serve(async (req) => {
   const started = performance.now();
   const response = await handler.handle({
@@ -55,5 +49,5 @@ Deno.serve(async (req) => {
   });
   // Duration feeds the "95% under 1 second" performance metric.
   console.log(JSON.stringify({ fn: "complete-lesson", status: response.status, ms: Math.round(performance.now() - started) }));
-  return new Response(response.body, { status: response.status, headers: HEADERS });
+  return new Response(response.body, { status: response.status, headers: RESPONSE_HEADERS });
 });

@@ -1,4 +1,5 @@
-import { ApiError } from "./ApiError.ts";
+import { ApiError } from "../_shared/http/ApiError.ts";
+import { bearerToken, type HttpRequest, type HttpResponse } from "../_shared/http/Http.ts";
 import { type Answer, CompleteLessonRequest } from "./CompleteLessonRequest.ts";
 
 /** What the handler needs from the outside world. Injected, so tests use fakes. */
@@ -11,17 +12,7 @@ export interface CompleteLessonDeps {
   logError(message: string, error: unknown): void;
 }
 
-/** The parts of an HTTP request the handler looks at. */
-export interface HttpRequest {
-  method: string;
-  authorization: string | null;
-  readBody(): Promise<string>;
-}
-
-export interface HttpResponse {
-  status: number;
-  body: string | null;
-}
+export type { HttpRequest, HttpResponse };
 
 /**
  * POST /complete-lesson (api/complete-lesson.md).
@@ -43,7 +34,7 @@ export class CompleteLessonHandler {
 
     try {
       // 1. Auth (401) comes first, so a malformed request from a signed-out user gets 401.
-      const token = CompleteLessonHandler.bearerToken(request.authorization);
+      const token = bearerToken(request.authorization);
       const userId = token ? await this.deps.verifyAccessToken(token) : null;
       if (!userId) return CompleteLessonHandler.error(ApiError.unauthenticated());
 
@@ -77,10 +68,5 @@ export class CompleteLessonHandler {
 
   private static error(error: ApiError): HttpResponse {
     return { status: error.status, body: JSON.stringify(error.toBody()) };
-  }
-
-  private static bearerToken(header: string | null): string | null {
-    const match = header?.match(/^Bearer\s+(\S+)$/i);
-    return match ? match[1] : null;
   }
 }
