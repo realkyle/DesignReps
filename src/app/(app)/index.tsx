@@ -7,7 +7,7 @@ import { useLessonPath } from "@/hooks/useLessonPath";
 import { authService } from "@/lib/auth";
 import type { PathItem } from "@/lib/learning";
 
-/** Home: the player's stats (tap for the progress screen) and the lesson path (completed ✓, open, locked 🔒). */
+/** Home: the player's stats (tap for the progress screen) and the lesson path (completed ✓, open, locked). */
 export default function HomeScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -32,7 +32,7 @@ export default function HomeScreen() {
           onPress={() => router.push("/progress")}
           style={({ pressed }) => [styles.stats, pressed && styles.rowPressed]}
         >
-          <Stat label="Streak" value={player ? `🔥 ${player.streak.current}` : "–"} />
+          <Stat label="Streak" value={player ? `${player.streak.current}` : "–"} />
           <Stat label="XP" value={player ? `${player.level.xp}` : "–"} />
           <Stat label="Level" value={player ? `${player.level.level}` : "–"} />
           <Text style={styles.statsChevron}>›</Text>
@@ -83,7 +83,7 @@ function Stat({ label, value }: { label: string; value: string }) {
 function LessonRow({ item, isNext, onPress }: { item: PathItem; isNext: boolean; onPress: () => void }) {
   const locked = item.status === "locked";
   const done = item.status === "completed";
-  const badge = done ? "✓" : locked ? "🔒" : String(item.position);
+  const badge = done ? "✓" : String(item.position);
   const subtitle = item.kind === "scenario" ? "Scenario · 25 XP" : "Lesson · 10 XP";
 
   return (
@@ -101,7 +101,7 @@ function LessonRow({ item, isNext, onPress }: { item: PathItem; isNext: boolean;
       ]}
     >
       <View style={[styles.badge, done && styles.badgeDone, isNext && styles.badgeNext, locked && styles.badgeLocked]}>
-        <Text style={[styles.badgeText, (done || isNext) && styles.badgeTextLight]}>{badge}</Text>
+        <Text style={[styles.badgeText, (done || isNext) && styles.badgeTextLight, locked && styles.lockedText]}>{badge}</Text>
       </View>
       <View style={styles.rowText}>
         <Text style={[styles.rowTitle, locked && styles.lockedText]}>{item.title}</Text>

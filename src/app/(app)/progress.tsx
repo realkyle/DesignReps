@@ -71,7 +71,7 @@ function StreakCard({ streak }: { streak: StreakStatus }) {
   return (
     <View style={styles.card}>
       <Text style={styles.cardLabel}>Streak</Text>
-      <Text style={[styles.big, streak.current > 0 && styles.streak]}>🔥 {days(streak.current)}</Text>
+      <Text style={[styles.big, streak.current > 0 && styles.streak]}>{days(streak.current)}</Text>
       <Text style={[styles.body, streak.state === "atRisk" && styles.atRisk]}>{streakMessage(streak)}</Text>
       <Text style={styles.muted}>Best: {days(streak.longest)}</Text>
     </View>
@@ -81,7 +81,7 @@ function StreakCard({ streak }: { streak: StreakStatus }) {
 function streakMessage(streak: StreakStatus): string {
   switch (streak.state) {
     case "doneToday":
-      return "Done for today ✓ Come back tomorrow to keep it going.";
+      return "Done for today. Come back tomorrow to keep it going.";
     case "atRisk":
       return "Complete a lesson today to keep your streak.";
     case "none":
