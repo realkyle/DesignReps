@@ -3,13 +3,15 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { Lesson } from "@/lib/lessons";
 import type { Database } from "@/lib/supabase/database.types";
 
+import { deviceTimeZone } from "./LessonCompletionClient";
 import { LessonPath, type PathLesson } from "./LessonPath";
+import { LevelProgress } from "./LevelProgress";
+import { StreakStatus } from "./StreakStatus";
 
-/** The signed-in user's game state, as shown in the home header. */
+/** The signed-in user's game state, as shown on Home and the progress screen. */
 export interface PlayerSummary {
-  xp: number;
-  level: number;
-  streak: number;
+  level: LevelProgress;
+  streak: StreakStatus;
 }
 
 export type Loaded<T> = { ok: true; value: T } | { ok: false; message: string };
@@ -24,7 +26,14 @@ const LOAD_FAILED = "Couldn't load your lessons. Pull down to try again.";
  * profile. Read-only: all writes go through the complete-lesson function.
  */
 export class LearningRepository {
-  constructor(private readonly client: SupabaseClient<Database>) {}
+  /**
+   * @param client - Supabase client signed in as the user.
+   * @param today - The user's calendar day (`YYYY-MM-DD`); injectable for tests.
+   */
+  constructor(
+    private readonly client: SupabaseClient<Database>,
+    private readonly today: () => string = () => StreakStatus.today(deviceTimeZone()),
+  ) {}
 
   /** The first track's lesson path with each lesson's status. */
   async loadPath(): Promise<Loaded<LessonPath>> {
@@ -58,9 +67,18 @@ export class LearningRepository {
     }
   }
 
+  /** XP, level progress and today's streak. The level is derived from XP, as on the server. */
   async loadPlayer(): Promise<Loaded<PlayerSummary>> {
-    const { data, error } = await this.client.from("users").select("xp, level, streak_current").maybeSingle();
+    const { data, error } = await this.client
+      .from("users")
+      .select("xp, streak_current, streak_longest, last_active_date")
+      .maybeSingle();
     if (error || !data) return { ok: false, message: LOAD_FAILED };
-    return { ok: true, value: { xp: data.xp, level: data.level, streak: data.streak_current } };
+    try {
+      const stored = { current: data.streak_current, longest: data.streak_longest, lastActiveDate: data.last_active_date };
+      return { ok: true, value: { level: LevelProgress.of(data.xp), streak: StreakStatus.of(stored, this.today()) } };
+    } catch {
+      return { ok: false, message: LOAD_FAILED };
+    }
   }
 }

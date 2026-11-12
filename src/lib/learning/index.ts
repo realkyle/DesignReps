@@ -12,6 +12,8 @@ export {
   LessonCompletionClient,
 } from "./LessonCompletionClient";
 export { LessonPath, type LessonStatus, type PathItem, type PathLesson } from "./LessonPath";
+export { LEVEL_THRESHOLDS, LevelProgress } from "./LevelProgress";
+export { StreakStatus, type StreakState } from "./StreakStatus";
 export { type AnswerFeedback, LessonSession, type SubmittedAnswer } from "./LessonSession";
 
 /** App-wide instances backed by the shared Supabase client. */

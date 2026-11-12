@@ -4,7 +4,7 @@
 
 A Duolingo-style mobile app for practicing **system design** for software-engineering interviews. Short, daily, gamified lessons cover the core concepts (scaling, caching, load balancing, databases), plus guided exercises on classic prompts like *design a URL shortener*. Streaks, XP and levels turn system design into a habit instead of a last-minute cram.
 
-> 🚧 In active development. MVP targeting the iOS App Store, with Android as a secondary target.
+> In active development. MVP targeting the iOS App Store, with Android as a secondary target.
 
 ## Why I'm building it
 

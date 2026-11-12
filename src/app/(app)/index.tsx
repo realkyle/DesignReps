@@ -7,7 +7,7 @@ import { useLessonPath } from "@/hooks/useLessonPath";
 import { authService } from "@/lib/auth";
 import type { PathItem } from "@/lib/learning";
 
-/** Home: the player's stats and the lesson path (completed ✓, open, locked 🔒). */
+/** Home: the player's stats (tap for the progress screen) and the lesson path (completed ✓, open, locked). */
 export default function HomeScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -21,11 +21,22 @@ export default function HomeScreen() {
     >
       <View style={styles.header}>
         <Text style={styles.brand}>DesignReps</Text>
-        <View style={styles.stats}>
-          <Stat label="Streak" value={player ? `🔥 ${player.streak}` : "–"} />
-          <Stat label="XP" value={player ? `${player.xp}` : "–"} />
-          <Stat label="Level" value={player ? `${player.level}` : "–"} />
-        </View>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={
+            player
+              ? `Your progress: ${player.streak.current}-day streak, ${player.level.xp} XP, level ${player.level.level}`
+              : "Your progress"
+          }
+          accessibilityHint="Opens your progress"
+          onPress={() => router.push("/progress")}
+          style={({ pressed }) => [styles.stats, pressed && styles.rowPressed]}
+        >
+          <Stat label="Streak" value={player ? `${player.streak.current}` : "–"} />
+          <Stat label="XP" value={player ? `${player.level.xp}` : "–"} />
+          <Stat label="Level" value={player ? `${player.level.level}` : "–"} />
+          <Text style={styles.statsChevron}>›</Text>
+        </Pressable>
       </View>
 
       {error && <Text style={styles.error}>{error}</Text>}
@@ -62,7 +73,7 @@ export default function HomeScreen() {
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <View style={styles.stat} accessible accessibilityLabel={`${label}: ${value}`}>
+    <View style={styles.stat}>
       <Text style={styles.statValue}>{value}</Text>
       <Text style={styles.statLabel}>{label}</Text>
     </View>
@@ -72,7 +83,7 @@ function Stat({ label, value }: { label: string; value: string }) {
 function LessonRow({ item, isNext, onPress }: { item: PathItem; isNext: boolean; onPress: () => void }) {
   const locked = item.status === "locked";
   const done = item.status === "completed";
-  const badge = done ? "✓" : locked ? "🔒" : String(item.position);
+  const badge = done ? "✓" : String(item.position);
   const subtitle = item.kind === "scenario" ? "Scenario · 25 XP" : "Lesson · 10 XP";
 
   return (
@@ -90,7 +101,7 @@ function LessonRow({ item, isNext, onPress }: { item: PathItem; isNext: boolean;
       ]}
     >
       <View style={[styles.badge, done && styles.badgeDone, isNext && styles.badgeNext, locked && styles.badgeLocked]}>
-        <Text style={[styles.badgeText, (done || isNext) && styles.badgeTextLight]}>{badge}</Text>
+        <Text style={[styles.badgeText, (done || isNext) && styles.badgeTextLight, locked && styles.lockedText]}>{badge}</Text>
       </View>
       <View style={styles.rowText}>
         <Text style={[styles.rowTitle, locked && styles.lockedText]}>{item.title}</Text>
@@ -108,7 +119,8 @@ const styles = StyleSheet.create({
   content: { paddingHorizontal: 20, gap: 8 },
   header: { gap: 16, marginBottom: 16 },
   brand: { fontSize: 28, fontWeight: "800", color: colors.text },
-  stats: { flexDirection: "row", gap: 12 },
+  stats: { flexDirection: "row", alignItems: "center", gap: 12 },
+  statsChevron: { fontSize: 28, fontWeight: "600", color: colors.textMuted },
   stat: {
     flex: 1,
     paddingVertical: 12,

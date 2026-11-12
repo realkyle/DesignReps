@@ -19,9 +19,9 @@ This is the **only** way a user earns XP, extends a streak or unlocks a lesson. 
 
 | Header | Required | Value |
 |---|---|---|
-| `Authorization` | ✅ | `Bearer <access_token>` of the signed-in user |
-| `apikey` | ✅ | The project's publishable key |
-| `Content-Type` | ✅ | `application/json` |
+| `Authorization` | Yes | `Bearer <access_token>` of the signed-in user |
+| `apikey` | Yes | The project's publishable key |
+| `Content-Type` | Yes | `application/json` |
 
 `supabase.functions.invoke("complete-lesson", { body })` sets all three automatically.
 
@@ -43,11 +43,11 @@ This is the **only** way a user earns XP, extends a streak or unlocks a lesson. 
 
 | Field | Type | Required | Rules |
 |---|---|---|---|
-| `lessonId` | string (UUID) | ✅ | Must be an existing, published lesson or scenario. |
-| `answers` | array | ✅ | Exactly one entry per question in the lesson, with no duplicates and no unknown IDs. Scenarios use the same shape: one entry per guided step. |
-| `answers[].questionId` | string | ✅ | A question ID from the lesson's JSON content. |
-| `answers[].choiceId` | string | ✅ | A choice ID belonging to that question. |
-| `timezone` | string | ❌ | An IANA time zone name, used to decide what "today" means for the streak. Defaults to `UTC`; invalid names are rejected. |
+| `lessonId` | string (UUID) | Yes | Must be an existing, published lesson or scenario. |
+| `answers` | array | Yes | Exactly one entry per question in the lesson, with no duplicates and no unknown IDs. Scenarios use the same shape: one entry per guided step. |
+| `answers[].questionId` | string | Yes | A question ID from the lesson's JSON content. |
+| `answers[].choiceId` | string | Yes | A choice ID belonging to that question. |
+| `timezone` | string | No | An IANA time zone name, used to decide what "today" means for the streak. Defaults to `UTC`; invalid names are rejected. |
 
 The client does **not** send a score or XP. Grading happens on the server, against the lesson content stored in the database.
 

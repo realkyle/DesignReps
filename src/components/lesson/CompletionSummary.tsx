@@ -12,7 +12,6 @@ export function CompletionSummary({ outcome }: { outcome: CompletionOutcome }) {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.emoji}>{alreadyCompleted ? "💪" : "🎉"}</Text>
       <Text style={styles.title}>{alreadyCompleted ? "Nice practice!" : "Lesson complete!"}</Text>
       <Text style={styles.score}>
         {score.correct} / {score.total} correct
@@ -20,7 +19,7 @@ export function CompletionSummary({ outcome }: { outcome: CompletionOutcome }) {
 
       <View style={styles.tiles}>
         <Tile value={`+${xpAwarded}`} label={alreadyCompleted ? "XP (repeat)" : "XP earned"} />
-        <Tile value={`🔥 ${streak.current}`} label={streak.extendedToday ? "Streak extended" : "Day streak"} />
+        <Tile value={`${streak.current}`} label={streak.extendedToday ? "Streak extended" : "Day streak"} />
         <Tile value={`${level.current}`} label={level.leveledUp ? "Level up!" : "Level"} />
       </View>
 
@@ -28,7 +27,7 @@ export function CompletionSummary({ outcome }: { outcome: CompletionOutcome }) {
         Total XP: {totalXp}
         {level.nextLevelXp !== null ? ` · ${level.nextLevelXp - totalXp} XP to level ${level.current + 1}` : " · Max level"}
       </Text>
-      {unlockedLessonId && <Text style={styles.unlocked}>🔓 Next lesson unlocked</Text>}
+      {unlockedLessonId && <Text style={styles.unlocked}>Next lesson unlocked</Text>}
     </View>
   );
 }
@@ -44,7 +43,6 @@ function Tile({ value, label }: { value: string; label: string }) {
 
 const styles = StyleSheet.create({
   container: { alignItems: "center", gap: 10, paddingTop: 24 },
-  emoji: { fontSize: 56 },
   title: { fontSize: 26, fontWeight: "800", color: colors.text },
   score: { fontSize: 17, color: colors.textMuted },
   tiles: { flexDirection: "row", gap: 10, marginTop: 16, alignSelf: "stretch" },
