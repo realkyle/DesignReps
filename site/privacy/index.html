@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DesignReps Privacy Policy</title>
+<meta name="description" content="What the DesignReps app collects, why, and how to delete it.">
+<style>
+  :root {
+    --bg: #ffffff; --fg: #1d2330; --muted: #5a6475; --rule: #e3e7ee;
+    --accent: #1f6fd1; --code-bg: #f2f4f8;
+    color-scheme: light dark;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #12151b; --fg: #e6e9ef; --muted: #a0a8b6; --rule: #2a303b; --accent: #6aa8f2; --code-bg: #1d222b; }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--fg);
+    font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  main { max-width: 44rem; margin: 0 auto; padding: 2.5rem 1.25rem 4rem; }
+  h1 { font-size: 1.9rem; line-height: 1.2; margin: 0 0 .25rem; }
+  h2 { font-size: 1.2rem; margin: 2.25rem 0 .5rem; padding-top: 1rem; border-top: 1px solid var(--rule); }
+  .updated { color: var(--muted); margin: 0 0 1.5rem; }
+  a { color: var(--accent); }
+  code { background: var(--code-bg); padding: .1em .35em; border-radius: 4px; font-size: .9em; }
+  ul { padding-left: 1.25rem; }
+  li { margin: .25rem 0; }
+  .table-wrap { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; font-size: .95rem; }
+  th, td { text-align: left; vertical-align: top; padding: .5rem .6rem; border-bottom: 1px solid var(--rule); }
+  th { font-weight: 600; }
+</style>
+</head>
+<body>
+<main>
+<h1>DesignReps Privacy Policy</h1>
+<p class="updated">Last updated: November 12, 2026</p>
+
+<p>DesignReps is a mobile app for practicing system design in short daily lessons. It is built and run by an independent developer. This policy explains what the app collects, why, where it is stored, and how you can delete it. The short version: we collect only what the app needs to sign you in and track your progress. We do not show ads, we do not sell or share your data, and we do not use third-party analytics or tracking.</p>
+
+<h2>What we collect</h2>
+
+<p><strong>Account information.</strong> When you create an account we store your <strong>email address</strong> and your <strong>password</strong>. The password is stored only as a one-way hash, so nobody can read it, us included. We use your email only to sign you in and to reply if you contact us.</p>
+
+<p><strong>Learning progress.</strong> To run the game (XP, levels, streaks, unlocking the next lesson) we store:</p>
+<ul>
+  <li>your total XP, your level, your current and longest streak, and the date you last completed a lesson;</li>
+  <li>for each lesson you complete: your best score, how many times you completed it, and when you first and last completed it.</li>
+</ul>
+
+<p><strong>Usage events.</strong> We record a small set of events so we can measure whether the app is useful (for example, how many people come back on a later day): when you <strong>open the app</strong>, <strong>start a lesson</strong>, <strong>complete a lesson</strong>, or <strong>complete a scenario</strong>. Each event stores only its type, the lesson it relates to (if any), and the time. Events are looked at in aggregate, never to profile you.</p>
+
+<p><strong>Things the app uses but does not keep.</strong></p>
+<ul>
+  <li><strong>Your answers.</strong> They are sent to our server to be graded. Only the resulting score is kept; the answers themselves are not stored.</li>
+  <li><strong>Your device's time zone</strong> (for example <code>America/Los_Angeles</code>). It is sent when you finish a lesson so your streak follows your local calendar day. It is used for that calculation and not stored.</li>
+</ul>
+
+<p><strong>Sign-in records.</strong> Our sign-in service (Supabase Auth) also records when you signed up, confirmed your email and last signed in. For each active session it keeps the IP address and device type (user agent), and it keeps a security log of sign-in activity that can include IP addresses. These are used only to keep accounts secure.</p>
+
+<p><strong>On your device.</strong> The app keeps your sign-in session in the app's local storage so you stay signed in. That session holds your access and refresh tokens, your email address and your account ID. It is removed when you sign out or delete your account.</p>
+
+<p><strong>Server logs.</strong> Like any online service, our hosting provider records technical request logs, which can include your IP address and device type, for security and troubleshooting. Our own server code logs which function ran, whether it succeeded and how long it took. When something fails, it also logs the error returned by the database or service. In rare cases that error can include your internal account ID, but never your email or password. These logs are used only to fix problems.</p>
+
+<h2>What we do not collect</h2>
+<ul>
+  <li>No name, phone number, photos, contacts, or location.</li>
+  <li>No advertising identifiers or device fingerprinting.</li>
+  <li>No third-party analytics, advertising, or tracking SDKs.</li>
+  <li>No payment information. The app is free.</li>
+</ul>
+<p>We do not track you across other apps or websites, and we do not sell, rent, or share your personal data with anyone for their own use.</p>
+
+<h2>How we use it</h2>
+<ul>
+  <li>To sign you in and keep your account secure.</li>
+  <li>To award XP, calculate your level and streak, and unlock lessons.</li>
+  <li>To measure, in aggregate, whether the app helps people learn and keeps them coming back, and to fix problems.</li>
+</ul>
+
+<h2>Where it is stored and who processes it</h2>
+<ul>
+  <li><strong>Supabase</strong> hosts our database, sign-in service, and server functions, on servers in the United States (Oregon). Supabase processes data only on our behalf. See the <a href="https://supabase.com/privacy">Supabase privacy policy</a>.</li>
+  <li><strong>Apple</strong> distributes the app through the App Store and TestFlight. Apple may collect data under its own policies, for example crash reports or TestFlight feedback that you choose to share.</li>
+</ul>
+
+<h2>How we protect it</h2>
+<ul>
+  <li>All traffic between the app and our server is encrypted (HTTPS).</li>
+  <li>Database access rules make sure each account can read only its own progress. No account can read anyone else's data.</li>
+  <li>Scores, XP, levels, and streaks are calculated on the server, not in the app, and the app cannot write them directly.</li>
+</ul>
+
+<h2>How long we keep it, and deleting your account</h2>
+<p>We keep your account, progress, and usage events until you delete your account. You can delete it at any time <strong>inside the app</strong>. Deletion is permanent and immediate: it removes your sign-in account and sessions, your progress, and all of your usage events. The sign-in security log, hosting-provider logs and backups that already contain your data expire on the provider's normal schedule and are not used to restore deleted accounts.</p>
+<p>If you cannot access the app, email us at the address below and we will delete your account for you.</p>
+
+<h2>Your choices and rights</h2>
+<p>You can ask us what data we hold about you, ask for a copy, ask us to correct it, or ask us to delete it. Depending on where you live (for example, in the EU, the UK, or California) you may have these rights under law. We will answer within 30 days and will not treat you differently for asking.</p>
+
+<h2>Children</h2>
+<p>DesignReps is not directed at children under 13, and we do not knowingly collect data from them. If you believe a child under 13 has created an account, contact us and we will delete it.</p>
+
+<h2>Changes to this policy</h2>
+<p>If we change what we collect or how we use it, we will update this page and the date at the top before the change takes effect.</p>
+
+<h2>Contact</h2>
+<p>Questions or requests: <a href="mailto:CONTACT_EMAIL">CONTACT_EMAIL</a></p>
+
+<h2>Reference: exact fields we store</h2>
+<p>For transparency, these are the stored fields, by table. Every field here is covered in plain language above.</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>Table</th><th>Field</th><th>What it is</th></tr></thead>
+  <tbody>
+    <tr><td>sign-in service</td><td><code>email</code>, password hash</td><td>Your sign-in details, kept by Supabase Auth</td></tr>
+    <tr><td>sign-in service</td><td>sign-up, email-confirmation and last sign-in times; per-session IP address and user agent; security log of sign-in activity</td><td>Managed by Supabase Auth to keep accounts secure</td></tr>
+    <tr><td><code>users</code></td><td><code>id</code></td><td>A random account ID (not derived from your email)</td></tr>
+    <tr><td><code>users</code></td><td><code>xp</code>, <code>level</code></td><td>Total XP and level (1 to 5)</td></tr>
+    <tr><td><code>users</code></td><td><code>streak_current</code>, <code>streak_longest</code>, <code>last_active_date</code></td><td>Your streak and the calendar day you last completed a lesson</td></tr>
+    <tr><td><code>users</code></td><td><code>tier</code></td><td>Account type; every account is <code>free</code></td></tr>
+    <tr><td><code>users</code></td><td><code>created_at</code></td><td>When the account was created</td></tr>
+    <tr><td><code>progress</code></td><td><code>user_id</code>, <code>lesson_id</code></td><td>Which account completed which lesson</td></tr>
+    <tr><td><code>progress</code></td><td><code>best_score</code>, <code>completion_count</code></td><td>Best score and number of completions</td></tr>
+    <tr><td><code>progress</code></td><td><code>completed_at</code>, <code>last_completed_at</code></td><td>First and most recent completion time</td></tr>
+    <tr><td><code>events</code></td><td><code>id</code>, <code>user_id</code></td><td>Event number and the account it belongs to</td></tr>
+    <tr><td><code>events</code></td><td><code>type</code></td><td>One of <code>app_opened</code>, <code>lesson_started</code>, <code>lesson_completed</code>, <code>scenario_completed</code></td></tr>
+    <tr><td><code>events</code></td><td><code>lesson_id</code>, <code>occurred_at</code></td><td>The related lesson (if any) and when it happened</td></tr>
+  </tbody>
+</table>
+</div>
+</main>
+</body>
+</html>
