@@ -111,9 +111,13 @@ describe("privacy policy matches the schema", () => {
     expect(types.filter((type) => !POLICY.includes(`<code>${type}</code>`))).toEqual([]);
   });
 
-  it("contains at most one email address (the project contact), and no school address", () => {
+  it("contains exactly one email address (the project contact), and no school address", () => {
     const addresses = new Set(POLICY.match(/[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}/gi) ?? []);
-    expect(addresses.size).toBeLessThanOrEqual(1);
+    expect(addresses.size).toBe(1);
     expect(POLICY).not.toMatch(/@[a-z0-9.-]*\.edu\b/i);
+  });
+
+  it("has no unfilled placeholder, so a draft can't be published", () => {
+    expect(POLICY).not.toContain("CONTACT_EMAIL");
   });
 });
