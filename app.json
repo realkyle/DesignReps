@@ -42,6 +42,12 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "e69d4249-0664-4077-a8ef-1c01fa15284c"
+      }
+    },
+    "owner": "kghh"
   }
 }
