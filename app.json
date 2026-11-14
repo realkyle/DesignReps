@@ -8,9 +8,11 @@
     "scheme": "designreps",
     "userInterfaceStyle": "automatic",
     "ios": {
+      "bundleIdentifier": "io.designreps.app",
       "icon": "./assets/expo.icon"
     },
     "android": {
+      "package": "io.designreps.app",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -32,11 +34,20 @@
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 76
         }
-      ]
+      ],
+      "expo-image",
+      "expo-status-bar",
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "e69d4249-0664-4077-a8ef-1c01fa15284c"
+      }
+    },
+    "owner": "kghh"
   }
 }
