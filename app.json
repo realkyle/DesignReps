@@ -8,9 +8,11 @@
     "scheme": "designreps",
     "userInterfaceStyle": "automatic",
     "ios": {
+      "bundleIdentifier": "io.designreps.app",
       "icon": "./assets/expo.icon"
     },
     "android": {
+      "package": "io.designreps.app",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
