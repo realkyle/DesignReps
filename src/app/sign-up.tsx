@@ -2,6 +2,7 @@ import { Link } from "expo-router";
 import { StyleSheet, Text } from "react-native";
 
 import { AuthForm, type AuthFormOutcome } from "@/components/AuthForm";
+import { PrivacyPolicyButton } from "@/components/PrivacyPolicyButton";
 import { authService } from "@/lib/auth";
 
 async function signUp(email: string, password: string): Promise<AuthFormOutcome> {
@@ -27,9 +28,12 @@ export default function SignUpScreen() {
       showPasswordChecklist
       onSubmit={signUp}
       footer={
-        <Link href="/sign-in" replace style={styles.link}>
-          <Text>Already have an account? Sign in</Text>
-        </Link>
+        <>
+          <Link href="/sign-in" replace style={styles.link}>
+            <Text>Already have an account? Sign in</Text>
+          </Link>
+          <PrivacyPolicyButton />
+        </>
       }
     />
   );

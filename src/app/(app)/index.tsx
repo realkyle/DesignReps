@@ -2,6 +2,7 @@ import { useRouter } from "expo-router";
 import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { PrivacyPolicyButton } from "@/components/PrivacyPolicyButton";
 import { colors } from "@/components/theme";
 import { useLessonPath } from "@/hooks/useLessonPath";
 import { authService } from "@/lib/auth";
@@ -67,6 +68,7 @@ export default function HomeScreen() {
       <Pressable accessibilityRole="button" onPress={() => router.push("/delete-account")} style={styles.deleteAccount}>
         <Text style={styles.deleteAccountText}>Delete account</Text>
       </Pressable>
+      <PrivacyPolicyButton />
     </ScrollView>
   );
 }
