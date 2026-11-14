@@ -133,6 +133,16 @@ describe("CompleteLessonHandler: errors from the database function", () => {
     expect(deps.logError).toHaveBeenCalled();
   });
 
+  it("an unknown error code is logged by its code only, never its details", async () => {
+    const dbError = { code: "WEIRD", message: "?", details: { userId: "secret-row-data" } };
+    const logError = jest.fn();
+    const { handler } = setup({ completeLesson: jest.fn(async () => ({ error: dbError })), logError });
+    await handler.handle(post(validBody));
+    const logged = logError.mock.calls[0][1] as Error;
+    expect(logged.message).toContain('"WEIRD"');
+    expect(logged.message).not.toContain("secret-row-data");
+  });
+
   it("a database failure → 500 with no internal details", async () => {
     const { handler, deps } = setup({
       completeLesson: jest.fn(async () => {
