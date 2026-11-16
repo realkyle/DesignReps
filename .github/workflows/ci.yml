@@ -1,0 +1,39 @@
+# Runs the app and Edge Function checks on every pull request and on main.
+# Same commands as CLAUDE.md §6: Jest, TypeScript, ESLint.
+# Needs no secrets: tests use fakes, and nothing here talks to Supabase.
+# The pgTAP database tests (npm run test:db) need Docker + a local Supabase,
+# so they still run locally for now.
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+# Least privilege: read the code, nothing else.
+permissions:
+  contents: read
+
+# A new push to the same PR cancels the run that's now out of date.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    name: Test, typecheck, lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci --no-audit --no-fund
+      - run: npm test -- --ci
+      - run: npm run typecheck
+      - run: npm run lint
