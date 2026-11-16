@@ -43,7 +43,7 @@ const MISSING_LESSON_ID = "00000000-0000-0000-0000-000000000000";
  * per log source (Auth, Postgres, API gateway, Edge Functions).
  *
  * Every trigger is safe to run against production:
- *   1. wrong password            → 400, auth_logs              (no write)
+ *   1. wrong password            → 400, Auth                   (no write)
  *   2. log_event with a bad type → 400, Postgres ERROR 22023   (raises before the insert)
  *   3. complete-lesson, no token → 401 UNAUTHENTICATED         (stops at the auth check)
  *   4. complete-lesson, unknown lesson → 404 LESSON_NOT_FOUND  (returned error, transaction rolls back)
@@ -99,7 +99,7 @@ export class MonitoringTriggers {
       email: this.config.testEmail,
       password: `${this.config.testPassword}-wrong`,
     });
-    return MonitoringTriggers.result(1, "sign in with a wrong password", 400, response, "Logs > Auth (auth_logs)");
+    return MonitoringTriggers.result(1, "sign in with a wrong password", 400, response, "Logs, Log Type Auth / API Gateway: POST /auth/v1/token 400");
   }
 
   private async logEventBadType(token: string): Promise<TriggerResult> {
@@ -109,13 +109,13 @@ export class MonitoringTriggers {
       "log_event with an unknown type",
       400,
       response,
-      "Logs > Postgres (postgres_logs, ERROR 22023) and Logs > API Gateway (edge_logs)",
+      "Logs, Log Type Postgres: ERROR 22023; API Gateway: POST /rest/v1/rpc/log_event 400",
     );
   }
 
   private async completeLessonNoToken(): Promise<TriggerResult> {
     const response = await this.post("/functions/v1/complete-lesson", {}, null);
-    return MonitoringTriggers.result(3, "complete-lesson with no token", 401, response, "Edge Functions > complete-lesson > Logs");
+    return MonitoringTriggers.result(3, "complete-lesson with no token", 401, response, "Logs, Log Type Edge Function: complete-lesson 401");
   }
 
   private async completeLessonUnknownLesson(token: string): Promise<TriggerResult> {
@@ -124,13 +124,13 @@ export class MonitoringTriggers {
       { lessonId: MISSING_LESSON_ID, answers: [{ questionId: "q1", choiceId: "a" }] },
       token,
     );
-    return MonitoringTriggers.result(4, "complete-lesson with an unknown lesson", 404, response, "Edge Functions > complete-lesson > Logs");
+    return MonitoringTriggers.result(4, "complete-lesson with an unknown lesson", 404, response, "Logs, Log Type Edge Function: complete-lesson 404 (Raw JSON has our LESSON_NOT_FOUND line)");
   }
 
   private async deleteAccountNoToken(): Promise<TriggerResult> {
     // Never pass a token here: with one, this request would delete the account.
     const response = await this.post("/functions/v1/delete-account", {}, null);
-    return MonitoringTriggers.result(5, "delete-account with no token", 401, response, "Edge Functions > delete-account > Logs");
+    return MonitoringTriggers.result(5, "delete-account with no token", 401, response, "Logs, Log Type Edge Function: delete-account 401");
   }
 
   /** Signs in the test account and returns its access token (kept in memory only, never printed). */

@@ -1,4 +1,4 @@
-/** How serious a log line is. Logs Explorer queries filter on this. */
+/** How serious a log line is: info, warn (client's fault) or error (ours). */
 export type LogLevel = "info" | "warn" | "error";
 
 /** What one request's summary line records. Never a user ID, token or request body. */
@@ -12,8 +12,8 @@ export interface RequestSummary {
 
 /**
  * Builds the JSON log lines every Edge Function writes, so all of them have
- * one shape that the saved Logs Explorer queries can filter on
- * (`supabase/snippets/monitoring/`).
+ * one shape. In the dashboard (Logs, Log Type Edge Function) the line is the
+ * `event_message` in its request row's Raw JSON.
  *
  * Only builds strings; the entry point does the actual `console.*` call, so
  * this stays a pure, testable class.
