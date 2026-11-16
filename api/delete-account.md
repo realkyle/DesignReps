@@ -28,7 +28,7 @@ The function calls Supabase's admin `deleteUser` (a hard delete). The schema cas
 auth.users ─(on delete cascade)→ public.users ─(on delete cascade)→ progress, events
 ```
 
-Shared content (`tracks`, `lessons`) is untouched. Function logs record only `{fn, status, ms}`, never the user ID.
+Shared content (`tracks`, `lessons`) is untouched. Function logs record only `{fn, level, status, code, ms}` (`code` is the API error code, if any) and, on a failure, the error's `name`, `code` and `message`; never the user ID.
 
 ## Client behavior
 

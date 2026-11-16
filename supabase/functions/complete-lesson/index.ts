@@ -9,6 +9,7 @@
 import { createClient } from "npm:@supabase/supabase-js@2.118.0";
 
 import { RESPONSE_HEADERS } from "../_shared/http/Http.ts";
+import { RequestLog } from "../_shared/http/RequestLog.ts";
 import { CompleteLessonHandler } from "./CompleteLessonHandler.ts";
 
 const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, {
@@ -36,7 +37,7 @@ const handler = new CompleteLessonHandler({
   },
 
   logError(message, error) {
-    console.error(message, error);
+    console.error(RequestLog.failure("complete-lesson", message, error));
   },
 });
 
@@ -48,6 +49,13 @@ Deno.serve(async (req) => {
     readBody: () => req.text(),
   });
   // Duration feeds the "95% under 1 second" performance metric.
-  console.log(JSON.stringify({ fn: "complete-lesson", status: response.status, ms: Math.round(performance.now() - started) }));
+  console.log(
+    RequestLog.summary({
+      fn: "complete-lesson",
+      status: response.status,
+      ms: performance.now() - started,
+      code: RequestLog.errorCodeOf(response.body),
+    }),
+  );
   return new Response(response.body, { status: response.status, headers: RESPONSE_HEADERS });
 });

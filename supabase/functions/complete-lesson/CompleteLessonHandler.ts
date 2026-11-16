@@ -60,7 +60,8 @@ export class CompleteLessonHandler {
     if (error === undefined) return { status: 200, body: JSON.stringify(result) };
 
     if (!ApiError.isKnownCode(error.code) || typeof error.message !== "string") {
-      throw new Error(`complete_lesson returned an unknown error: ${JSON.stringify(error)}`);
+      // Only the code: the rest of the error can hold row data, which the logs never keep.
+      throw new Error(`complete_lesson returned an unknown error code: ${JSON.stringify(error.code)}`);
     }
     const details = typeof error.details === "object" && error.details !== null ? (error.details as Record<string, unknown>) : undefined;
     return CompleteLessonHandler.error(ApiError.of(error.code, error.message, details));

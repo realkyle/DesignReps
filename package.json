@@ -55,7 +55,8 @@
     "test:db": "supabase test db",
     "test:db:concurrency": "bash supabase/tests/concurrency/double-submit.sh",
     "seed:build": "tsx scripts/build-seed.ts",
-    "seed:push": "npm run seed:build && supabase db push --linked --include-seed"
+    "seed:push": "npm run seed:build && supabase db push --linked --include-seed",
+    "monitor:trigger": "tsx scripts/monitoring/trigger-test-errors.ts"
   },
   "private": true,
   "jest": {

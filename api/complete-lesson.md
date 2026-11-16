@@ -138,7 +138,7 @@ interface ApiError {
 | HTTP | `code` | When |
 |---|---|---|
 | `405` | `METHOD_NOT_ALLOWED` | Any method other than `POST` (`OPTIONS` is answered for CORS) |
-| `500` | `INTERNAL_ERROR` | An unexpected failure. Nothing is written (the transaction rolls back) and the error is logged server-side. The message never includes internal details. |
+| `500` | `INTERNAL_ERROR` | An unexpected failure. Nothing is written (the transaction rolls back) and the error is logged server-side (only its `name`, `code` and `message`; see `supabase/functions/_shared/http/RequestLog.ts`). The message never includes internal details. |
 
 **Check order:** auth → body validation → lesson exists → lesson unlocked. The first failing check decides the error. For example, a malformed request from a signed-out user gets `401`.
 

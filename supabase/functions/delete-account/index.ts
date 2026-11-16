@@ -9,6 +9,7 @@
 import { createClient } from "npm:@supabase/supabase-js@2.118.0";
 
 import { RESPONSE_HEADERS } from "../_shared/http/Http.ts";
+import { RequestLog } from "../_shared/http/RequestLog.ts";
 import { DeleteAccountHandler } from "./DeleteAccountHandler.ts";
 
 const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, {
@@ -29,7 +30,7 @@ const handler = new DeleteAccountHandler({
   },
 
   logError(message, error) {
-    console.error(message, error);
+    console.error(RequestLog.failure("delete-account", message, error));
   },
 });
 
@@ -41,6 +42,13 @@ Deno.serve(async (req) => {
     readBody: () => req.text(),
   });
   // Never logs the user ID: after deletion, nothing should tie logs to the person.
-  console.log(JSON.stringify({ fn: "delete-account", status: response.status, ms: Math.round(performance.now() - started) }));
+  console.log(
+    RequestLog.summary({
+      fn: "delete-account",
+      status: response.status,
+      ms: performance.now() - started,
+      code: RequestLog.errorCodeOf(response.body),
+    }),
+  );
   return new Response(response.body, { status: response.status, headers: RESPONSE_HEADERS });
 });
