@@ -11,6 +11,12 @@ import { join, resolve } from "node:path";
 const ROOT = resolve(__dirname, "../../..");
 const MIGRATIONS_DIR = join(ROOT, "supabase/migrations");
 const POLICY = readFileSync(join(ROOT, "site/privacy/index.html"), "utf8");
+const HOME = readFileSync(join(ROOT, "site/index.html"), "utf8");
+
+/** Distinct email addresses in a page. */
+function emailsIn(html: string): Set<string> {
+  return new Set(html.match(/[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}/gi) ?? []);
+}
 
 /** Tables holding per-user data. tracks/lessons are shared content, not personal data. */
 const PERSONAL_TABLES = ["users", "progress", "events"] as const;
@@ -112,12 +118,30 @@ describe("privacy policy matches the schema", () => {
   });
 
   it("contains exactly one email address (the project contact), and no school address", () => {
-    const addresses = new Set(POLICY.match(/[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}/gi) ?? []);
-    expect(addresses.size).toBe(1);
+    expect(emailsIn(POLICY).size).toBe(1);
     expect(POLICY).not.toMatch(/@[a-z0-9.-]*\.edu\b/i);
   });
 
   it("has no unfilled placeholder, so a draft can't be published", () => {
     expect(POLICY).not.toContain("CONTACT_EMAIL");
+  });
+});
+
+/**
+ * The home page is the App Store Support URL, so it must show a contact (guideline 1.5).
+ * It must be the policy's contact, so the two pages can't drift apart.
+ */
+describe("home page support contact", () => {
+  it("shows a Support line with the same address as the privacy policy", () => {
+    const [policyContact] = emailsIn(POLICY);
+    const supportLine = HOME.match(/<p>Support: <a href="mailto:([^"]+)">([^<]+)<\/a><\/p>/);
+    expect(supportLine).not.toBeNull();
+    const [, mailto, shown] = supportLine!;
+    expect(mailto).toBe(policyContact);
+    expect(shown).toBe(policyContact);
+  });
+
+  it("contains no other email address", () => {
+    expect([...emailsIn(HOME)]).toEqual([...emailsIn(POLICY)]);
   });
 });
