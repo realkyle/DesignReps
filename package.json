@@ -56,7 +56,9 @@
     "test:db:concurrency": "bash supabase/tests/concurrency/double-submit.sh",
     "seed:build": "tsx scripts/build-seed.ts",
     "seed:push": "npm run seed:build && supabase db push --linked --include-seed",
-    "monitor:trigger": "tsx scripts/monitoring/trigger-test-errors.ts"
+    "monitor:trigger": "tsx scripts/monitoring/trigger-test-errors.ts",
+    "perf:complete-lesson": "tsx scripts/perf/measure-complete-lesson.ts",
+    "perf:explain": "docker exec -i supabase_db_DesignReps psql -U postgres -d postgres -q < scripts/perf/explain-lookups.sql"
   },
   "private": true,
   "jest": {
