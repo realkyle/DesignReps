@@ -43,6 +43,13 @@ describe("app.json identifiers", () => {
   });
 });
 
+describe("app.json export compliance", () => {
+  it("declares no non-exempt encryption, so App Store Connect skips the export question", () => {
+    // HTTPS to Supabase uses OS-provided encryption, which Apple treats as exempt.
+    expect(expo.ios.config.usesNonExemptEncryption).toBe(false);
+  });
+});
+
 describe("eas.json", () => {
   it("keeps build numbers on EAS servers", () => {
     expect(eas.cli.appVersionSource).toBe("remote");
