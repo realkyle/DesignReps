@@ -9,7 +9,10 @@
     "userInterfaceStyle": "automatic",
     "ios": {
       "bundleIdentifier": "io.designreps.app",
-      "icon": "./assets/expo.icon"
+      "icon": "./assets/expo.icon",
+      "config": {
+        "usesNonExemptEncryption": false
+      }
     },
     "android": {
       "package": "io.designreps.app",
